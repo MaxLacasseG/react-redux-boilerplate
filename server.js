@@ -1,18 +1,39 @@
 const express = require("express");
 const app = express();
-const port = process.env.PORT || 5000;
+const port = 5000 || ENV.port;
+const bodyParser = require("body-parser");
+const passport = require("passport");
 const logger = require("tracer").colorConsole();
-
-//require routes
-
 const mongoose = require("mongoose");
-//connect mongoose
+const morgan = require("morgan");
+const db = require("./config/keys").mongoURI;
 
-//Add passport
+//REQUIRE ROUTES
+const utilisateur = require("./routes/Utilisateur");
 
-//use middlewares
+mongoose.connect(
+    db,
+    { useNewUrlParser: true },
+    err => {
+        if (err) logger.log(err);
+        logger.trace("Connecté à la base de donnée");
+    }
+);
+//PASSPORT INIT, ADDS TO REQUESTS
+passport.initialize();
+require("./config/passport")(passport);
 
-// use routes
+//MIDDLEWARES
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
+app.use(morgan("dev"));
+
+//ROUTES
+app.use("/api/utilisateur", utilisateur);
+
 app.listen(port, err => {
-    logger.trace(`listening on port ${port}`);
+    if (err) logger.log(err);
+    //ADD DB CONNECTION TO REQUESTS
+
+    logger.trace(`listening on ${port}`);
 });
