@@ -43,9 +43,7 @@ class ConnexionForm extends Component {
                     <div className="row">
                         <div className="col-md-8 m-auto">
                             <h1 className="display-4 text-center">Connexion</h1>
-                            <p className="lead text-center">
-                                Tempo, le système de suivi du temps travaillé
-                            </p>
+                            <p className="lead text-center">Admin</p>
                             <form onSubmit={this.onSubmit}>
                                 <div className="form-group">
                                     <input

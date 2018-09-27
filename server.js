@@ -33,7 +33,5 @@ app.use("/api/utilisateur", utilisateur);
 
 app.listen(port, err => {
     if (err) logger.log(err);
-    //ADD DB CONNECTION TO REQUESTS
-
     logger.trace(`listening on ${port}`);
 });

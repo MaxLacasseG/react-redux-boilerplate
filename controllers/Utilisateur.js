@@ -9,117 +9,121 @@ const keys = require("../config/keys");
 // @param {object}			data: Les infos fournis par le formulaire d'inscription
 // @return {err, result}	result: L'utilisateur enregistré
 //							err: L'erreur s'il y a lieu
-controller.creer = data => {
-   //TODOS:VALIDATION
-   return controller
-      .courrielExistant(data.courriel)
-      .then(courrielExiste => {
-         if (courrielExiste) {
-            throw { success: false, courriel: "Utilisateur existant" };
-         }
-         bcrypt.hash(data.mdp, saltRounds, (err, hash) => {
-            if (err) logger.log(err);
-            const utilisateur = new Utilisateur(data);
-            utilisateur.courriel = utilisateur.courriel.toLowerCase().trim();
-            utilisateur.mdp = hash;
-
-            return utilisateur.save();
-         });
-      })
-      .catch(err => {
-         throw err;
-      });
+controller.creer = async data => {
+    //TODOS:VALIDATION
+    return await controller
+        .courrielExistant(data.courriel)
+        .then(async courrielExiste => {
+            if (courrielExiste) {
+                return await {
+                    success: false,
+                    courriel: "Utilisateur existant"
+                };
+            }
+            return await new Promise((resolve, reject) => {
+                bcrypt.hash(data.mdp, saltRounds, (err, hash) => {
+                    if (err) reject(err);
+                    const utilisateur = new Utilisateur(data);
+                    utilisateur.courriel = utilisateur.courriel
+                        .toLowerCase()
+                        .trim();
+                    utilisateur.mdp = hash;
+                    const result = utilisateur.save();
+                    resolve(result);
+                });
+            });
+        });
 };
 
 controller.connexion = data => {
-   //VALIDATION
-   return controller
-      .rechercher(data.courriel)
-      .then(utilisateur => {
-         return new Promise((resolve, reject) => {
-            bcrypt.compare(data.mdp, utilisateur.mdp, (err, result) => {
-               if (err) reject(err);
-               else {
-                  if (result) {
-                     const payload = {
-                        id: utilisateur._id,
-                        courriel: utilisateur.courriel,
-                        prenom: utilisateur.prenom,
-                        nom: utilisateur.nom,
-                        regions: utilisateur.regions,
-                        admin: utilisateur.admin
-                     };
-                     JWT.sign(
-                        payload,
-                        keys.secretOrKey,
-                        { expiresIn: 3600 },
-                        (err, token) => {
-                           if (err) throw err;
-                           resolve({
-                              success: true,
-                              msg: "Connecté",
-                              token: "Bearer " + token
-                           });
+    //VALIDATION
+    return controller
+        .rechercher(data.courriel)
+        .then(utilisateur => {
+            return new Promise((resolve, reject) => {
+                bcrypt.compare(data.mdp, utilisateur.mdp, (err, result) => {
+                    if (err) reject(err);
+                    else {
+                        if (result) {
+                            const payload = {
+                                id: utilisateur._id,
+                                courriel: utilisateur.courriel,
+                                prenom: utilisateur.prenom,
+                                nom: utilisateur.nom,
+                                regions: utilisateur.regions,
+                                admin: utilisateur.admin
+                            };
+                            JWT.sign(
+                                payload,
+                                keys.secretOrKey,
+                                { expiresIn: 3600 },
+                                (err, token) => {
+                                    if (err) throw err;
+                                    resolve({
+                                        success: true,
+                                        msg: "Connecté",
+                                        token: "Bearer " + token
+                                    });
+                                }
+                            );
+                        } else {
+                            reject(false);
                         }
-                     );
-                  } else {
-                     reject(false);
-                  }
-               }
+                    }
+                });
             });
-         });
-      })
-      .catch(err => {
-         throw err;
-      });
+        })
+        .catch(err => {
+            throw err;
+        });
 };
 
 // @param  {string} 	courriel
 // @return {bool}	Retourne si le courriel existe dans la bdd ou non
-controller.courrielExistant = courriel => {
-   return Utilisateur.find(
-      {
-         courriel: courriel.toLowerCase().trim()
-      },
-      null
-   ).then(utilisateurs => {
-      return utilisateurs.length > 0;
-   });
+controller.courrielExistant = async courriel => {
+    return await Utilisateur.find(
+        {
+            courriel: courriel.toLowerCase().trim()
+        },
+        null
+    ).then(async utilisateurs => {
+        return (await utilisateurs.length) > 0;
+    });
 };
 
 controller.inviter = function(data) {
-   return controller
-      .emailInUse(data.username)
-      .then(function(inUse) {
-         if (inUse) {
-            throw {
-               title: i18n.__("common.error"),
-               msg: i18n.__("signup.alreadyExists")
-            };
-         }
-         var user = new User(data);
-         var email = user.username.toLowerCase().trim();
-         user.emails.push({ email: email, confirmed: false });
+    return controller
+        .emailInUse(data.username)
+        .then(function(inUse) {
+            if (inUse) {
+                throw {
+                    title: i18n.__("common.error"),
+                    msg: i18n.__("signup.alreadyExists")
+                };
+            }
+            var user = new User(data);
+            var email = user.username.toLowerCase().trim();
+            user.emails.push({ email: email, confirmed: false });
 
-         return user.save();
-      })
-      .then(function(user) {
-         return controller.sendInvite(
-            user,
-            user.username,
-            data.email,
-            data.program || {},
-            data.event
-         );
-      });
+            return user.save();
+        })
+        .then(function(user) {
+            return controller.sendInvite(
+                user,
+                user.username,
+                data.email,
+                data.program || {},
+                data.event
+            );
+        });
 };
 
 controller.rechercher = courriel => {
-   return Utilisateur.findOne({ courriel: courriel });
+    return Utilisateur.findOne({ courriel: courriel });
 };
 
 controller.rechercherParId = id => {
-   return Utilisateur.findById(id);
+    return Utilisateur.findById(id);
 };
 
 /* 
@@ -214,12 +218,12 @@ controller.resetPassword = function(user, password) {
 }
  */
 controller.update = function(user, data) {
-   return controller.find(user.username).then(function(user) {
-      user.firstName = data.firstName || user.firstName;
-      user.lastName = data.lastName || user.lastName;
-      user.birthday = data.birthday || user.birthday;
-      return user.save();
-   });
+    return controller.find(user.username).then(function(user) {
+        user.firstName = data.firstName || user.firstName;
+        user.lastName = data.lastName || user.lastName;
+        user.birthday = data.birthday || user.birthday;
+        return user.save();
+    });
 };
 
 module.exports = controller;

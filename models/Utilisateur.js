@@ -4,19 +4,18 @@ const bcrypt = require("bcrypt");
 const logger = require("tracer").colorConsole();
 
 const UtilisateurSchema = new Schema({
-   courriel: {
-      type: String,
-      required: true,
-      select: true
-   },
-   estConfirme: { type: Boolean, select: true, default: false },
-   confirmationCode: { type: String },
-   mdp: { type: String },
-   prenom: { type: String, select: true },
-   nom: { type: String, select: true },
-   resetCode: { type: String, select: false },
-   regions: [{ type: Schema.Types.ObjectId, ref: "Region", default: [] }],
-   admin: { type: Boolean, default: false }
+    courriel: {
+        type: String,
+        required: true,
+        select: true
+    },
+    estConfirme: { type: Boolean, select: true, default: false },
+    confirmationCode: { type: String },
+    mdp: { type: String },
+    prenom: { type: String, select: true },
+    nom: { type: String, select: true },
+    resetCode: { type: String, select: false },
+    admin: { type: Boolean, default: false }
 });
 
 UtilisateurSchema.path("courriel").index({ unique: true });

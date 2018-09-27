@@ -5,7 +5,7 @@ import jwt_decode from "jwt-decode";
 
 export const login = (userData, history) => dispatch => {
     axios
-        .post("/api/employe/connexion", userData)
+        .post("/api/utilisateur/connexion", userData)
         .then(result => {
             const { token } = result.data;
             localStorage.setItem("jwtToken", token);

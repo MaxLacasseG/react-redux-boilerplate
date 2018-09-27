@@ -9,41 +9,41 @@ var Utilisateur = require("../models/Utilisateur");
 // @route   POST /api/utilisateur/enregistrement
 // @desc    Créer un nouvel utilisateur
 // @access  private - admin
-router.post("/enregistrement", (req, res) => {
-   UtilisateurController.creer(req.body)
-      .then(result => {
-         res.status(200).json(result);
-      })
-      .catch(err => {
-         res.status(400).json(err);
-      });
+router.post("/enregistrement", async (req, res) => {
+    await UtilisateurController.creer(req.body)
+        .then(async result => {
+            await res.status(200).json(result);
+        })
+        .catch(err => {
+            res.status(400).json(err);
+        });
 });
 
 router.get(
-   "/:email",
-   passport.authenticate("jwt", { session: false }),
-   (req, res) => {
-      logger.trace(req.user);
-      UtilisateurController.courrielExistant(req.params.email)
-         .then(resultat => {
-            res.status(200).json(resultat);
-         })
-         .catch(err => {
-            res.status(200).json(err);
-         });
-   }
+    "/:email",
+    passport.authenticate("jwt", { session: false }),
+    (req, res) => {
+        logger.trace(req.user);
+        UtilisateurController.courrielExistant(req.params.email)
+            .then(resultat => {
+                res.status(200).json(resultat);
+            })
+            .catch(err => {
+                res.status(200).json(err);
+            });
+    }
 );
 
 router.post("/connexion", (req, res) => {
-   UtilisateurController.connexion(req.body)
-      .then(resultat => {
-         //logger.log(resultat);
-         //TODO:Ajouter le token à passeport
-         res.status(200).json(resultat);
-      })
-      .catch(err => {
-         res.status(400).json(err);
-      });
+    UtilisateurController.connexion(req.body)
+        .then(resultat => {
+            //logger.log(resultat);
+            //TODO:Ajouter le token à passeport
+            res.status(200).json(resultat);
+        })
+        .catch(err => {
+            res.status(400).json(err);
+        });
 });
 
 /* router.get("/:email", function(req, res) {
@@ -58,8 +58,8 @@ router.post("/connexion", (req, res) => {
 }); */
 
 router.post("/logout", function(
-   req,
-   res
+    req,
+    res
 ) {}); /* 
 router.post("/forgotPassword", function(req, res) {
 	UserController.forgotPassword(req.body.email).then(

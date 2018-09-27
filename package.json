@@ -6,10 +6,10 @@
     "scripts": {
         "client-install": "npm install --prefix client",
         "start": "export NODE_ENV=develop && node app",
-        "server": "export NODE_ENV=develop && nodemon app",
-        "client": "export NODE_ENV=develop && npm start --prefix client",
+        "server": "nodemon app",
+        "client": "npm start --prefix client",
         "dev": "concurrently \"npm run server\" \"npm run client\" ",
-        "build": "export NODE_ENV=production"
+        "heroku-postbuild": "export NODE_ENV=production && NPM_CONFIG_PRODUCTION=false npm install --prefix client && npm run build --prefix client"
     },
     "repository": {
         "type": "git",
